@@ -1,0 +1,120 @@
+// This program can find GCD (Greatest Common Divisor) and LCM (Least Common Multiple) for any pair of numbers.
+// It also displays the factorizations of numbers.
+//
+// contact: alinajafies.io+dev@gmail.com
+
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main()
+{
+    // "length" is the number of possible prime divisors for each number.
+    // One is added to save also the actual numbers in the array.
+    // "gcdCount" keeps the record for the number of common divisors.
+    // "num" array elements show "number selection - first/second", "powers/divisors selection"
+    // and "the data stored for each number".
+    int length = 5, k = 1, num[2][2][length+1], gcd[2][length+1], gcdCount;
+
+    // Remove previous data
+    // Powers of prime divisors in the first row and the divisors on the second one
+    for (int i = 0; i <= length; i++) {
+        gcd[0][i] = 0;
+        gcd[1][i] = 1;
+    }
+
+    cout << "Calculate GCD and LCM\n\n";
+
+    // First array element is for number selection – 0 for the first and 1 for the second
+    // We save them in the first data column (column 0)
+    cout << "Enter the first number: ";
+    cin >> num[0][1][0];
+    cout << "Enter the second number: ";
+    cin >> num[1][1][0];
+
+    for (int z = 0; z < 2; z++) {
+        // Prime divisors start from 2. It will be increased in the process.
+        int divisor = 2, dividend = num[z][1][0], sqrRoot = sqrt(dividend), i = 1, factorCount;
+
+        // Remove previous data
+        for (int i = 1; i <= length; i++) {
+            num[z][0][i] = 0;
+            num[z][1][i] = 1;
+        }
+
+        // Loop divisions to find the divisors
+        while (divisor <= sqrRoot) {
+            if (dividend % divisor == 0) {
+                if (num[z][1][i] == divisor) // If it's the same divisor, just add to the power
+                    num[z][0][i]++;
+                else { // Otherwise, add a new divisor
+                    if (num[z][0][i] != 0)
+                        i++;
+                    num[z][1][i] = divisor;
+                    num[z][0][i] = 1;
+                }
+                dividend = dividend / divisor; // Continue the division with the quotient
+            }
+            else
+                divisor++;
+        }
+        if (dividend > 1) {
+            i++;
+            num[z][1][i] = dividend;
+            num[z][0][i] = 1;
+        }
+
+        // Display numbers' factorizations
+        factorCount = i;
+        cout << num[z][1][0] << " = ";
+        for (int i = 1; i <= factorCount; i++) {
+            cout << num[z][1][i];
+            if (num[z][0][i] > 1)
+                cout << "^" << num[z][0][i];
+            if (i < factorCount)
+                cout << " × ";
+        }
+        cout << "\n";
+    }
+
+    // Calculate GCD
+    for (int i = 1; i <= length; i++) {
+        for (int j = 1; j <= length; j++) {
+            if (num[0][1][i] == num[1][1][j]) { // Search for the common divisors
+                if (gcd[0][k] != 0)
+                    k++;
+                gcd[1][k] = num[0][1][i];
+                gcd[0][k] = fmin(num[0][0][i],num[1][0][j]); // Select the least power
+            }
+        }
+    }
+
+    // Number of GCD factors
+    gcdCount = k-1;
+
+    for (int i = 1; i <= gcdCount; i++) {
+        gcd[1][0] = gcd[1][0] * pow(gcd[1][i],gcd[0][i]);
+    }
+
+    cout << "GCD = " << gcd[1][0];
+
+    // Display GCD factorization
+    if (gcdCount > 1 || gcd[0][1] > 1) {
+        cout << "  (";
+        for (int i = 1; i <= gcdCount; i++) {
+            cout << gcd[1][i];
+            if (gcd[0][i] > 1)
+                cout << "^" << gcd[0][i];
+            if (i < gcdCount)
+                cout << " × ";
+        }
+        cout << ")";
+    }
+
+    // Calculate LCM based on GCD and store it in an unused cell
+    gcd[0][0] = num[0][1][0] * num[1][1][0] / gcd[1][0];
+
+    cout << "\nLCM = " << gcd[0][0] << endl;
+
+    return 0;
+}
